@@ -1,6 +1,4 @@
-import {Component} from "react";
-
-const withData = (maxSpeakersToShow: number) => (Component) => {
+const SpeakerRenderProps = (props) => {
     const speakers = [
         {
             imageSrc: 'speaker-component-1124.png',
@@ -15,10 +13,9 @@ const withData = (maxSpeakersToShow: number) => (Component) => {
             name: 'Eugene Chuvyron'
         }
     ]
-    return () => {
-        const limitSpeakers = speakers.slice(0,maxSpeakersToShow);
-        return <Component speakers={limitSpeakers}></Component>;
-    };
+    return props.children({
+        speakers: speakers
+    });
 }
 
-export default withData;
+export default SpeakerRenderProps;
