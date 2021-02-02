@@ -1,3 +1,4 @@
+import SpeakerSearchBar from "../SpeakerSearchBar/SpeakerSearchBar";
 
 const Speakers = () => {
     const speakers = [
@@ -40,14 +41,7 @@ const Speakers = () => {
     ];
     return (
         <div>
-            <div className="mb-6 ">
-                <input
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    id="username"
-                    type="text"
-                    placeholder="Search by name"
-                />
-            </div>
+            <SpeakerSearchBar/>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-12">
                 {speakers.map(({ id, firstName, lastName, bio, isFavorite }) => (
                     <div className="rounded overflow-hidden shadow-lg p-6" key={id}>
