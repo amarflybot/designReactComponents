@@ -1,4 +1,5 @@
 import SpeakerSearchBar from "../SpeakerSearchBar/SpeakerSearchBar";
+import {useState} from "react";
 
 const Speakers = () => {
     const speakers = [
@@ -39,11 +40,16 @@ const Speakers = () => {
                 'Eugene Chuvyrov is  a Senior Cloud Architect at Microsoft. He works directly with both startups and enterprises to enable their solutions in Microsoft cloud, and to make Azure better as a result of this work with partners.',
         },
     ];
+
+    const [searchQuery, setSearchQuery] = useState("");
     return (
         <div>
-            <SpeakerSearchBar/>
+            <SpeakerSearchBar
+                setSearchQuery={setSearchQuery}
+                searchQuery={searchQuery}
+            />
             <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-12">
-                {speakers.map(({ id, firstName, lastName, bio, isFavorite }) => (
+                {speakers.filter(value => value.name.indexOf(searchQuery)>-1).map(({ id, firstName, lastName, bio, isFavorite }) => (
                     <div className="rounded overflow-hidden shadow-lg p-6" key={id}>
                         <div className="grid grid-cols-4 mb-6">
                             <div className="font-bold text-lg col-span-3">{`${firstName} ${lastName}`}</div>
