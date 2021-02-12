@@ -1,13 +1,14 @@
 import SpeakerSearchBar from "../SpeakerSearchBar/SpeakerSearchBar";
-import {useEffect, useReducer, useState} from "react";
+import {useContext, useEffect, useReducer, useState} from "react";
 import SpeakerFavouriteButton from "./SpeakerFavouriteButton";
 import axios from "axios";
 import {GET_ALL_FAILURE, GET_ALL_SUCCESS, PUT_FAILURE, PUT_SUCCESS} from "../../actions/request";
 import {REQUEST_STATUS, requestReducer} from "../../reducers/request";
+import {DataContext, DataProvider} from "./DataContext";
 
 const URL = 'http://localhost:3004/speakers';
 
-interface Speaker {
+export interface Speaker {
     imageSrc: string,
     id: number,
     firstName: string,
@@ -18,56 +19,22 @@ interface Speaker {
     bio: string
 }
 
-const Speakers = ({bgColor}) => {
+const SpeakersComponent = ({bgColor}) => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [{records: speakers, status, error}, dispatch] = useReducer(requestReducer, {
-        status: REQUEST_STATUS.LOADING,
-        speakers: [],
-        error: null
-    });
+
+    const {records: speakers, status, error, put} = useContext(DataContext);
 
 
     const toggleSpeakerFavourite = async (speaker: Speaker) => {
-        const newSpeaker = {
+        put({
             ...speaker,
             isFavorite: !speaker.isFavorite,
-        }
-        try {
-            await axios.put(`${URL}/${newSpeaker.id}`, newSpeaker);
-            dispatch({
-                type: PUT_SUCCESS,
-                record: newSpeaker
-            })
-        } catch (e) {
-            dispatch({
-                type: PUT_FAILURE,
-                error: e
-            })
-        }
+        })
     };
 
     const success = status === REQUEST_STATUS.SUCCESS;
     const isLoading = status === REQUEST_STATUS.LOADING;
     const hasErrored = status === REQUEST_STATUS.ERROR;
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(URL);
-                dispatch({
-                    records: response.data,
-                    type: GET_ALL_SUCCESS
-                });
-            } catch (e) {
-                dispatch({
-                    type: GET_ALL_FAILURE,
-                    status: REQUEST_STATUS.ERROR
-                })
-            }
-        }
-        fetchData();
-
-    }, [])
 
     return (
         <div className={bgColor}>
@@ -105,6 +72,14 @@ const Speakers = ({bgColor}) => {
                 </div>
             )}
         </div>
+    )
+}
+
+const Speakers = (props) => {
+    return (
+        <DataProvider baseurl='http://localhost:3004' routeName='speakers'>
+            <SpeakersComponent {...props}/>
+        </DataProvider>
     )
 }
 
