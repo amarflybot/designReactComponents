@@ -1,4 +1,4 @@
-import {useEffect, useReducer} from "react";
+import {useCallback, useEffect, useReducer} from "react";
 import {REQUEST_STATUS, requestReducer} from "../reducers/request";
 import axios from "axios";
 import {GET_ALL_FAILURE, GET_ALL_SUCCESS, PUT_FAILURE, PUT_SUCCESS} from "../actions/request";
@@ -35,7 +35,7 @@ const useRequest = (baseurl, routeName) => {
         records,
         status,
         error,
-        put: async (record) => {
+        put: useCallback(async (record) => {
             try {
                 await axios.put(`${baseurl}/${routeName}/${record.id}`, record);
                 dispatch({
@@ -48,7 +48,7 @@ const useRequest = (baseurl, routeName) => {
                     error: e,
                 })
             }
-        }
+        },[])
     }
 
     return propsLocal;

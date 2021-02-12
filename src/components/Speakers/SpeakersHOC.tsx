@@ -44,7 +44,7 @@ const Speakers = ({records: speakers, status, error, put, bgColor }) => {
                             <div
                                 className="font-bold text-lg col-span-3">{`${(speaker.firstName)} ${(speaker.lastName)}`}</div>
                             <SpeakerFavouriteButton isFavorite={speaker.isFavorite}
-                                                    toggleSpeakerFavouriteRef={() => omFavouriteToggleHandler(speaker)}/>
+                                                    onFavouriteToggle={() => omFavouriteToggleHandler(speaker)}/>
                         </div>
                         <div className="mb-6">
                             <img

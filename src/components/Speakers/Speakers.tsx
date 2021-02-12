@@ -1,10 +1,8 @@
 import SpeakerSearchBar from "../SpeakerSearchBar/SpeakerSearchBar";
-import {useContext, useEffect, useReducer, useState} from "react";
-import SpeakerFavouriteButton from "./SpeakerFavouriteButton";
-import axios from "axios";
-import {GET_ALL_FAILURE, GET_ALL_SUCCESS, PUT_FAILURE, PUT_SUCCESS} from "../../actions/request";
-import {REQUEST_STATUS, requestReducer} from "../../reducers/request";
+import React, {memo, useCallback, useContext, useState} from "react";
+import {REQUEST_STATUS} from "../../reducers/request";
 import {DataContext, DataProvider} from "../../context/DataContext";
+import {IndividualSpeaker} from "./Speaker";
 
 const URL = 'http://localhost:3004/speakers';
 
@@ -24,14 +22,6 @@ const SpeakersComponent = ({bgColor}) => {
 
     const {records: speakers, status, error, put} = useContext(DataContext);
 
-
-    const toggleSpeakerFavourite = async (speaker: Speaker) => {
-        put({
-            ...speaker,
-            isFavorite: !speaker.isFavorite,
-        })
-    };
-
     const success = status === REQUEST_STATUS.SUCCESS;
     const isLoading = status === REQUEST_STATUS.LOADING;
     const hasErrored = status === REQUEST_STATUS.ERROR;
@@ -46,21 +36,8 @@ const SpeakersComponent = ({bgColor}) => {
             {success && <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-12">
                 {speakers.filter(value => (value.firstName.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1)
                     || (value.lastName.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1)).map((speaker: Speaker) => (
-                    <div className="rounded overflow-hidden shadow-lg p-6 bg-white" key={speaker.id}>
-                        <div className="grid grid-cols-4 mb-6">
-                            <div
-                                className="font-bold text-lg col-span-3">{`${(speaker.firstName)} ${(speaker.lastName)}`}</div>
-                            <SpeakerFavouriteButton isFavorite={speaker.isFavorite}
-                                                    toggleSpeakerFavouriteRef={() => toggleSpeakerFavourite(speaker)}/>
-                        </div>
-                        <div className="mb-6">
-                            <img
-                                src={`/speakers/speaker-${(speaker.id)}.jpg`}
-                                alt={`${(speaker.firstName)} ${(speaker.lastName)}`}
-                            />
-                        </div>
-                        <div className="text-gray-600">{speaker.bio.substr(0, 70) + '...'}</div>
-                    </div>
+                    <IndividualSpeaker key={speaker.id} speaker={speaker}
+                                       put={put}/>
                 ))}
             </div>}
             {hasErrored && (
