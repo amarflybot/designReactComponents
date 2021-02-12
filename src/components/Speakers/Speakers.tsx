@@ -1,74 +1,122 @@
 import SpeakerSearchBar from "../SpeakerSearchBar/SpeakerSearchBar";
-import {useState} from "react";
+import {useEffect, useReducer, useState} from "react";
+import SpeakerFavouriteButton from "./SpeakerFavouriteButton";
+import axios from "axios";
+
+interface Speaker {
+    imageSrc: string,
+    id: number,
+    firstName: string,
+    lastName: string,
+    sat: boolean,
+    sun: boolean,
+    isFavorite: boolean,
+    bio: string
+}
 
 const Speakers = () => {
-    const speakers = [
-        {
-            imageSrc: 'speaker-component-1124',
-            name: 'Douglas Crockford',
-            id: 1124,
-            firstName: 'Douglas',
-            lastName: 'Crockford',
-            sat: true,
-            sun: false,
-            isFavorite: false,
-            bio:
-                'Douglas Crockford discovered the JSON Data Interchange Format. He is also the author of _JavaScript: The Good Parts_. He has been called a guru, but he is actually more of a mahatma.',
-        },
-        {
-            imageSrc: 'speaker-component-1530',
-            name: 'Tamara Baker',
-            id: 1530,
-            firstName: 'Tamara',
-            lastName: 'Baker',
-            sat: false,
-            sun: true,
-            isFavorite: true,
-            bio:
-                'Tammy has held a number of executive and management roles over the past 15 years, including VP engineering Roles at Molekule Inc., Cantaloupe Systems, E-Color, and Untangle Inc.',
-        },
-        {
-            imageSrc: 'speaker-component-10803',
-            name: 'Eugene Chuvyrov',
-            id: 10803,
-            firstName: 'Eugene',
-            lastName: 'Chuvyrov',
-            sat: true,
-            sun: false,
-            isFavorite: false,
-            bio:
-                'Eugene Chuvyrov is  a Senior Cloud Architect at Microsoft. He works directly with both startups and enterprises to enable their solutions in Microsoft cloud, and to make Azure better as a result of this work with partners.',
-        },
-    ];
+
+    const REQUEST_STATUS = {
+        LOADING: 'loading',
+        SUCCESS: 'success',
+        ERROR: 'error'
+    }
+
+    const reducer = (state, action) => {
+        switch (action.type) {
+            case 'GET_ALL_SUCCESS':
+                return {
+                    ...state,
+                    status: REQUEST_STATUS.SUCCESS,
+                    speakers: action.speakers,
+                };
+            case 'UPDATE_STATUS':
+                return {
+                    ...state,
+                    status: action.status,
+                };
+        }
+    };
 
     const [searchQuery, setSearchQuery] = useState("");
+    const [{speakers, status}, dispatch] = useReducer(reducer, {
+        status: REQUEST_STATUS.LOADING,
+        speakers: [],
+    });
+    //const [status, setStatus] = useState(REQUEST_STATUS.LOADING);
+    const [error, setError] = useState({});
+
+
+    const toggleSpeakerFavourite = async (speaker: Speaker) => {
+        const newSpeaker = {
+            ...speaker,
+            isFavorite: !speaker.isFavorite,
+        }
+        try {
+            await axios.put(`http://localhost:3004/speakers/${speaker.id}`, newSpeaker);
+        } catch (e) {
+            dispatch({
+                type: 'UPDATE_STATUS',
+                status: REQUEST_STATUS.ERROR
+            })
+            setError(e)
+        }
+        const speakerIndex = speakers.map((speaker1) => speaker1.id).indexOf(speaker.id);
+        dispatch([...speakers.slice(0, speakerIndex), newSpeaker, ...speakers.slice(speakerIndex + 1)])
+    };
+
+    const success = status === REQUEST_STATUS.SUCCESS;
+    const isLoading = status === REQUEST_STATUS.LOADING;
+    const hasErrored = status === REQUEST_STATUS.ERROR;
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get("http://localhost:3004/speakers");
+                dispatch({
+                    speakers: response.data,
+                    type: 'GET_ALL_SUCCESS'
+                });
+            } catch (e) {
+                dispatch({
+                    type: 'UPDATE_STATUS',
+                    status: REQUEST_STATUS.ERROR
+                })
+                setError(e)
+            }
+        }
+        fetchData();
+
+    }, [])
+
     return (
         <div>
             <SpeakerSearchBar
                 setSearchQuery={setSearchQuery}
                 searchQuery={searchQuery}
             />
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-12">
-                {speakers.filter(value => value.name.indexOf(searchQuery)>-1).map(({ id, firstName, lastName, bio, isFavorite }) => (
-                    <div className="rounded overflow-hidden shadow-lg p-6" key={id}>
+            {isLoading && <div>Loading...</div>}
+            {success && <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-12">
+                {speakers.filter(value => (value.firstName.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1)
+                    || (value.lastName.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1)).map((speaker: Speaker) => (
+                    <div className="rounded overflow-hidden shadow-lg p-6" key={speaker.id}>
                         <div className="grid grid-cols-4 mb-6">
-                            <div className="font-bold text-lg col-span-3">{`${firstName} ${lastName}`}</div>
-                            <div className="flex justify-end">
-                                <div
-                                    className={isFavorite ? 'heartredbutton' : 'heartdarkbutton'}
-                                ></div>
-                            </div>
+                            <div
+                                className="font-bold text-lg col-span-3">{`${(speaker.firstName)} ${(speaker.lastName)}`}</div>
+                            <SpeakerFavouriteButton isFavorite={speaker.isFavorite}
+                                                    toggleSpeakerFavouriteRef={() => toggleSpeakerFavourite(speaker)}/>
                         </div>
                         <div className="mb-6">
                             <img
-                                src={`/speakers/speaker-${id}.jpg`}
-                                alt={`${firstName} ${lastName}`}
+                                src={`/speakers/speaker-${(speaker.id)}.jpg`}
+                                alt={`${(speaker.firstName)} ${(speaker.lastName)}`}
                             />
                         </div>
-                        <div className="text-gray-600">{bio.substr(0, 70) + '...'}</div>
+                        <div className="text-gray-600">{speaker.bio.substr(0, 70) + '...'}</div>
                     </div>
                 ))}
-            </div>
+            </div>}
+            {hasErrored && <div>An Error Occurred, Please try again!!</div>}
         </div>
     )
 }
