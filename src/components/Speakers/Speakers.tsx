@@ -2,7 +2,7 @@ import SpeakerSearchBar from "../SpeakerSearchBar/SpeakerSearchBar";
 import React, {memo, useCallback, useContext, useState} from "react";
 import {REQUEST_STATUS} from "../../reducers/request";
 import {DataContext, DataProvider} from "../../context/DataContext";
-import {IndividualSpeaker} from "./Speaker";
+import IndividualSpeaker from "./Speaker";
 
 const URL = 'http://localhost:3004/speakers';
 
