@@ -2,6 +2,8 @@ import SpeakerSearchBar from "../SpeakerSearchBar/SpeakerSearchBar";
 import {useEffect, useReducer, useState} from "react";
 import SpeakerFavouriteButton from "./SpeakerFavouriteButton";
 import axios from "axios";
+import {GET_ALL_FAILURE, GET_ALL_SUCCESS, PUT_FAILURE, PUT_SUCCESS} from "../../actions/request";
+import {REQUEST_STATUS, requestReducer} from "../../reducers/request";
 
 interface Speaker {
     imageSrc: string,
@@ -15,35 +17,12 @@ interface Speaker {
 }
 
 const Speakers = () => {
-
-    const REQUEST_STATUS = {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        ERROR: 'error'
-    }
-
-    const reducer = (state, action) => {
-        switch (action.type) {
-            case 'GET_ALL_SUCCESS':
-                return {
-                    ...state,
-                    status: REQUEST_STATUS.SUCCESS,
-                    speakers: action.speakers,
-                };
-            case 'UPDATE_STATUS':
-                return {
-                    ...state,
-                    status: action.status,
-                };
-        }
-    };
-
     const [searchQuery, setSearchQuery] = useState("");
-    const [{speakers, status}, dispatch] = useReducer(reducer, {
+    const [{records: speakers, status, error}, dispatch] = useReducer(requestReducer, {
         status: REQUEST_STATUS.LOADING,
         speakers: [],
+        error: null
     });
-    const [error, setError] = useState({});
 
 
     const toggleSpeakerFavourite = async (speaker: Speaker) => {
@@ -52,16 +31,17 @@ const Speakers = () => {
             isFavorite: !speaker.isFavorite,
         }
         try {
-            await axios.put(`http://localhost:3004/speakers/${speaker.id}`, newSpeaker);
+            await axios.put(`http://localhost:3004/speakers/${newSpeaker.id}`, newSpeaker);
+            dispatch({
+                type: PUT_SUCCESS,
+                record: newSpeaker
+            })
         } catch (e) {
             dispatch({
-                type: 'UPDATE_STATUS',
-                status: REQUEST_STATUS.ERROR
+                type: PUT_FAILURE,
+                error: e
             })
-            setError(e)
         }
-        const speakerIndex = speakers.map((speaker1) => speaker1.id).indexOf(speaker.id);
-        dispatch([...speakers.slice(0, speakerIndex), newSpeaker, ...speakers.slice(speakerIndex + 1)])
     };
 
     const success = status === REQUEST_STATUS.SUCCESS;
@@ -73,15 +53,14 @@ const Speakers = () => {
             try {
                 const response = await axios.get("http://localhost:3004/speakers");
                 dispatch({
-                    speakers: response.data,
-                    type: 'GET_ALL_SUCCESS'
+                    records: response.data,
+                    type: GET_ALL_SUCCESS
                 });
             } catch (e) {
                 dispatch({
-                    type: 'UPDATE_STATUS',
+                    type: GET_ALL_FAILURE,
                     status: REQUEST_STATUS.ERROR
                 })
-                setError(e)
             }
         }
         fetchData();
@@ -115,7 +94,14 @@ const Speakers = () => {
                     </div>
                 ))}
             </div>}
-            {hasErrored && <div>An Error Occurred, Please try again!!</div>}
+            {hasErrored && (
+                <div>
+                    Loading error... Is the json-server running? (try "npm run
+                    json-server" at terminal prompt)
+                    <br />
+                    <b>ERROR: {error.message}</b>
+                </div>
+            )}
         </div>
     )
 }
