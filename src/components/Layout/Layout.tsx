@@ -1,15 +1,31 @@
 import Header from "../Header/Header";
 import Menu from "../Menu/Menu";
 import Footer from "../Footer/Footer";
-import React from "react";
+import React, {useContext} from "react";
+import {ThemeContext, THEMELIST, ThemeProvider} from "../../context/ThemeContext";
+
+const LayoutComponent = ({children}) => {
+
+    const {theme} = useContext(ThemeContext);
+
+    const classNameValue = theme === THEMELIST.LIGHT ? 'overflow-auto bg-white' : 'overflow-auto bg-gray-500'
+
+    return (
+        <div className={classNameValue}>
+            <div className='mx-4 my-3'>
+                <Header/>
+                <Menu/>
+                {children}
+                <Footer/>
+            </div>
+        </div>
+    )
+}
 
 const Layout = ({children}) => (
-    <div className='mx-4 my-3'>
-        <Header/>
-        <Menu/>
-        {children}
-        <Footer/>
-    </div>
+    <ThemeProvider startingTheme={THEMELIST.DARK}>
+        <LayoutComponent>{children}</LayoutComponent>
+    </ThemeProvider>
 )
 
 export default Layout;

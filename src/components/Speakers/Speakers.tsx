@@ -4,7 +4,7 @@ import SpeakerFavouriteButton from "./SpeakerFavouriteButton";
 import axios from "axios";
 import {GET_ALL_FAILURE, GET_ALL_SUCCESS, PUT_FAILURE, PUT_SUCCESS} from "../../actions/request";
 import {REQUEST_STATUS, requestReducer} from "../../reducers/request";
-import {DataContext, DataProvider} from "./DataContext";
+import {DataContext, DataProvider} from "../../context/DataContext";
 
 const URL = 'http://localhost:3004/speakers';
 
@@ -46,7 +46,7 @@ const SpeakersComponent = ({bgColor}) => {
             {success && <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-12">
                 {speakers.filter(value => (value.firstName.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1)
                     || (value.lastName.toLowerCase().indexOf(searchQuery.toLowerCase()) > -1)).map((speaker: Speaker) => (
-                    <div className="rounded overflow-hidden shadow-lg p-6" key={speaker.id}>
+                    <div className="rounded overflow-hidden shadow-lg p-6 bg-white" key={speaker.id}>
                         <div className="grid grid-cols-4 mb-6">
                             <div
                                 className="font-bold text-lg col-span-3">{`${(speaker.firstName)} ${(speaker.lastName)}`}</div>

@@ -1,7 +1,7 @@
 import {createContext} from "react";
-import {GET_ALL_SUCCESS} from "../../actions/request";
-import {Speaker} from "./Speakers";
-import useRequest from "../../hooks/useRequest";
+import {GET_ALL_SUCCESS} from "../actions/request";
+import {Speaker} from "../components/Speakers/Speakers";
+import useRequest from "../hooks/useRequest";
 
 interface DataContextProps {
     records: Speaker[],
