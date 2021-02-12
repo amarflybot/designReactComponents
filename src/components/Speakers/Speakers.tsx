@@ -43,7 +43,6 @@ const Speakers = () => {
         status: REQUEST_STATUS.LOADING,
         speakers: [],
     });
-    //const [status, setStatus] = useState(REQUEST_STATUS.LOADING);
     const [error, setError] = useState({});
 
 
