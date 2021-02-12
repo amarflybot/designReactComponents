@@ -5,6 +5,8 @@ import axios from "axios";
 import {GET_ALL_FAILURE, GET_ALL_SUCCESS, PUT_FAILURE, PUT_SUCCESS} from "../../actions/request";
 import {REQUEST_STATUS, requestReducer} from "../../reducers/request";
 
+const URL = 'http://localhost:3004/speakers';
+
 interface Speaker {
     imageSrc: string,
     id: number,
@@ -16,7 +18,6 @@ interface Speaker {
     bio: string
 }
 
-const url = 'http://localhost:3004/speakers';
 const Speakers = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [{records: speakers, status, error}, dispatch] = useReducer(requestReducer, {
@@ -32,7 +33,7 @@ const Speakers = () => {
             isFavorite: !speaker.isFavorite,
         }
         try {
-            await axios.put(`${url}/${newSpeaker.id}`, newSpeaker);
+            await axios.put(`${URL}/${newSpeaker.id}`, newSpeaker);
             dispatch({
                 type: PUT_SUCCESS,
                 record: newSpeaker
@@ -52,7 +53,7 @@ const Speakers = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(url);
+                const response = await axios.get(URL);
                 dispatch({
                     records: response.data,
                     type: GET_ALL_SUCCESS
