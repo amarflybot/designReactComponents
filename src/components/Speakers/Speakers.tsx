@@ -16,6 +16,7 @@ interface Speaker {
     bio: string
 }
 
+const url = 'http://localhost:3004/speakers';
 const Speakers = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [{records: speakers, status, error}, dispatch] = useReducer(requestReducer, {
@@ -31,7 +32,7 @@ const Speakers = () => {
             isFavorite: !speaker.isFavorite,
         }
         try {
-            await axios.put(`http://localhost:3004/speakers/${newSpeaker.id}`, newSpeaker);
+            await axios.put(`${url}/${newSpeaker.id}`, newSpeaker);
             dispatch({
                 type: PUT_SUCCESS,
                 record: newSpeaker
@@ -51,7 +52,7 @@ const Speakers = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get("http://localhost:3004/speakers");
+                const response = await axios.get(url);
                 dispatch({
                     records: response.data,
                     type: GET_ALL_SUCCESS
