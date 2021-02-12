@@ -1,8 +1,11 @@
 import SpeakerSearchBar from "../SpeakerSearchBar/SpeakerSearchBar";
-import {useState} from "react";
+import {useEffect, useReducer, useState} from "react";
 import SpeakerFavouriteButton from "./SpeakerFavouriteButton";
-import {REQUEST_STATUS} from "../../reducers/request";
-import withRequest from "../hocs/withRequest";
+import axios from "axios";
+import {GET_ALL_FAILURE, GET_ALL_SUCCESS, PUT_FAILURE, PUT_SUCCESS} from "../../actions/request";
+import {REQUEST_STATUS, requestReducer} from "../../reducers/request";
+
+const URL = 'http://localhost:3004/speakers';
 
 interface Speaker {
     imageSrc: string,
@@ -15,22 +18,59 @@ interface Speaker {
     bio: string
 }
 
-const Speakers = ({records: speakers, status, error, put, bgColor }) => {
+const Speakers = () => {
     const [searchQuery, setSearchQuery] = useState("");
+    const [{records: speakers, status, error}, dispatch] = useReducer(requestReducer, {
+        status: REQUEST_STATUS.LOADING,
+        speakers: [],
+        error: null
+    });
 
-    const omFavouriteToggleHandler = async (speaker: Speaker) => {
-        put({
+
+    const toggleSpeakerFavourite = async (speaker: Speaker) => {
+        const newSpeaker = {
             ...speaker,
             isFavorite: !speaker.isFavorite,
-        })
+        }
+        try {
+            await axios.put(`${URL}/${newSpeaker.id}`, newSpeaker);
+            dispatch({
+                type: PUT_SUCCESS,
+                record: newSpeaker
+            })
+        } catch (e) {
+            dispatch({
+                type: PUT_FAILURE,
+                error: e
+            })
+        }
     };
 
     const success = status === REQUEST_STATUS.SUCCESS;
     const isLoading = status === REQUEST_STATUS.LOADING;
     const hasErrored = status === REQUEST_STATUS.ERROR;
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(URL);
+                dispatch({
+                    records: response.data,
+                    type: GET_ALL_SUCCESS
+                });
+            } catch (e) {
+                dispatch({
+                    type: GET_ALL_FAILURE,
+                    status: REQUEST_STATUS.ERROR
+                })
+            }
+        }
+        fetchData();
+
+    }, [])
+
     return (
-        <div className={bgColor}>
+        <div>
             <SpeakerSearchBar
                 setSearchQuery={setSearchQuery}
                 searchQuery={searchQuery}
@@ -44,7 +84,7 @@ const Speakers = ({records: speakers, status, error, put, bgColor }) => {
                             <div
                                 className="font-bold text-lg col-span-3">{`${(speaker.firstName)} ${(speaker.lastName)}`}</div>
                             <SpeakerFavouriteButton isFavorite={speaker.isFavorite}
-                                                    toggleSpeakerFavouriteRef={() => omFavouriteToggleHandler(speaker)}/>
+                                                    toggleSpeakerFavouriteRef={() => toggleSpeakerFavourite(speaker)}/>
                         </div>
                         <div className="mb-6">
                             <img
@@ -68,4 +108,4 @@ const Speakers = ({records: speakers, status, error, put, bgColor }) => {
     )
 }
 
-export default withRequest('http://localhost:3004','speakers')(Speakers);
+export default Speakers;
