@@ -5,7 +5,7 @@ import Layout from "../src/components/Layout/Layout";
 const Page = () => {
     return (
         <Layout>
-            <Speakers bgColor="bg-gray-500"/>
+            <Speakers bgColor="bg-gray-100"/>
         </Layout>
 )
 }
