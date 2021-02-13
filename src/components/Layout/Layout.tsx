@@ -2,6 +2,7 @@ import Header from "../Header/Header";
 import Menu from "../Menu/Menu";
 import Footer from "../Footer/Footer";
 import React, {useContext} from "react";
+import ReactNotification from 'react-notifications-component'
 import {ThemeContext, THEMELIST, ThemeProvider} from "../../context/ThemeContext";
 
 const LayoutComponent = ({children}) => {
@@ -12,6 +13,7 @@ const LayoutComponent = ({children}) => {
 
     return (
         <div className={classNameValue}>
+            <ReactNotification />
             <div className='mx-4 my-3'>
                 <Header/>
                 <Menu/>

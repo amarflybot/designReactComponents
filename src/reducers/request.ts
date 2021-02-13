@@ -1,4 +1,4 @@
-import {GET_ALL_FAILURE, GET_ALL_SUCCESS, PUT_FAILURE, PUT_SUCCESS} from "../actions/request";
+import {GET_ALL_FAILURE, GET_ALL_SUCCESS, PUT, PUT_FAILURE, PUT_SUCCESS} from "../actions/request";
 
 export const REQUEST_STATUS = {
     LOADING: 'loading',
@@ -20,12 +20,13 @@ export const requestReducer = (state, action) => {
                 error: action.error,
                 status: REQUEST_STATUS.ERROR,
             };
-        case PUT_SUCCESS:
+        case PUT:
             const { records } = state;
             const { record } = action;
             const recordIndex = records.map((record1) => record1.id).indexOf(record.id);
             return {
                 ...state,
+                prevRecords: state.records,
                 records: [
                     ...records.slice(0, recordIndex),
                     record,
@@ -35,6 +36,7 @@ export const requestReducer = (state, action) => {
         case PUT_FAILURE:
             return {
                 ...state,
+                records: state.prevRecords,
                 status: REQUEST_STATUS.ERROR,
                 error: action.error,
             };
